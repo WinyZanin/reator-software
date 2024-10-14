@@ -31,8 +31,6 @@ falta:
 #define TIME_STAGE_3 10000  //tempo do estagio 3 (sedimentação)
 #define TIME_STAGE_4 10000  //tempo do estagio 4 (esvaizamento/retirada)
 #define TIME_STAGE_5 10000  //tempo do estagio 5
-#define TIME_VAP1 15000     //tempo de acionamento da valvula 1 de entrada (VAP1)
-#define TIME_VAP2 15000     //tempo de acionamento da valvula 2 de saída (VAP2)
 
 byte stage = 0;  //estágio de funcionamento do reator
 

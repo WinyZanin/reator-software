@@ -19,6 +19,10 @@
 //#define PIN_REDOX 6          //sensor de potencial redox
 //#define PIN_CONDUTIVIDADE 7  //sensor de condutividade
 
+//configuração de tempo de acionamento das valvulas
+#define TIME_VAP1 15000     //tempo de acionamento da valvula 1 de entrada (VAP1)
+#define TIME_VAP2 15000     //tempo de acionamento da valvula 2 de saída (VAP2)
+
 //biblioteca do sensor de temperatura
 #include <DS18B20.h>   //necessita instalar a biblioteca <OneWire.h> para funcionar
 #include <OneWire.h>   //biblioteca para comunicação 1-Wire
