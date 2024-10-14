@@ -47,6 +47,7 @@ private:
   // Método privado para registrar log no Monitor Serial e no cartão SD
   void log(const char* level, const char* message) {
     // Monta a mensagem de log, incluindo o tempo em milissegundos e o estágio atual
+    // Exemplo: [INFO] 4235 ms Stage:1 - Iniciando o processo de anaerobico
     String logMessage = String(level) + " " + String(millis()) + " ms Stage:" + *PointerStage + " - " + message;
 
     // Imprime no Monitor Serial
