@@ -2,6 +2,7 @@
 #define LOGGER_H
 
 #include "SDCard.h"
+#include "config.h"
 
 class Logger {
 public:
@@ -12,10 +13,16 @@ public:
   };
 
   // Construtor da classe
-  Logger(Level logLevel, SDCard* sdCard, byte* stage) {
-    this->logLevel = logLevel;   // Nível de log que será utilizado
-    this->sdCard = sdCard;       // Referência para a classe SDCard
-    this->PointerStage = stage;  // Referência para a variável de estágio
+  Logger(IniConfig* iniConfig, SDCard* sdCard, byte* stage) {
+    this->pointerIniConfig = iniConfig;  // Referência para a struct de configuração
+    this->sdCard = sdCard;               // Referência para a classe SDCard
+    this->PointerStage = stage;          // Referência para a variável de estágio
+  }
+
+  // Método para inicializar o logger
+  void init() {
+    // Converte a string de configuração para o enum Level
+    logLevel = stringToEnum(pointerIniConfig->log_level);
   }
 
   // Método para registrar mensagens informativas
@@ -39,10 +46,53 @@ public:
     }
   }
 
+  void showConfig() {
+    String logMessage;
+    const char* message;
+    logMessage = "TIME_STAGE_0: " + String(pointerIniConfig->time_stage_0);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "TIME_STAGE_1: " + String(pointerIniConfig->time_stage_1);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "TIME_STAGE_2: " + String(pointerIniConfig->time_stage_2);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "TIME_STAGE_3: " + String(pointerIniConfig->time_stage_3);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "TIME_STAGE_4: " + String(pointerIniConfig->time_stage_4);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "TIME_STAGE_5: " + String(pointerIniConfig->time_stage_5);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "TIME_VAP1: " + String(pointerIniConfig->time_vap1);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "TIME_VAP2: " + String(pointerIniConfig->time_vap2);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "LOG_LEVEL: " + String(pointerIniConfig->log_level);
+    message = logMessage.c_str();
+    log("[INFO]", message);
+    logMessage = "LOG_LEVEL ATIVO: ";
+    if (logLevel == DEBUG) {
+      logMessage += "DEBUG";
+    } else if (logLevel == INFO) {
+      logMessage += "INFO";
+    } else if (logLevel == ERROR) {
+      logMessage += "ERROR";
+    }
+    message = logMessage.c_str();
+    log("[INFO]", message);
+  }
+
 private:
-  Level logLevel;      // Nível de log que será utilizado
-  SDCard* sdCard;      // Ponteiro para o SDCard
-  byte* PointerStage;  // Ponteiro para a variável de estágio
+  Level logLevel;               // Nível de log que será utilizado
+  IniConfig* pointerIniConfig;  // Ponteiro para a struct de configuração
+  SDCard* sdCard;               // Ponteiro para o SDCard
+  byte* PointerStage;           // Ponteiro para a variável de estágio
 
   // Método privado para registrar log no Monitor Serial e no cartão SD
   void log(const char* level, const char* message) {
@@ -55,6 +105,62 @@ private:
 
     // Grava no arquivo de log no cartão SD
     sdCard->writeLog(logMessage.c_str());
+  }
+
+  // Função que converte uma string para o enum Level
+  Level stringToEnum(char* str) {
+    //log("[TESTE1]", str);
+    trim(str);  // Remove espaços em branco no início e no final
+    //log("[TESTE2]", str);
+    toUpperCase(str);  // Converte para maiúsculas
+    //log("[TESTE3]", str);
+
+    if (strcmp(str, "DEBUG") == 0) {
+      return DEBUG;
+    } else if (strcmp(str, "INFO") == 0) {
+      return INFO;
+    } else if (strcmp(str, "ERROR") == 0) {
+      return ERROR;
+    } else {
+      // Retorna DEBUG como padrão, ou adicione um valor "UNKNOWN" no enum
+      return INFO;
+    }
+  }
+
+  // Função para remover espaços em branco no início e no final da string
+  void trim(char* str) {
+    // Remove espaços do final
+    int end = strlen(str) - 1;
+    while (end >= 0 && isspace(str[end])) {
+      str[end] = '\0';
+      end--;
+    }
+
+    // Remove espaços do início
+    int start = 0;
+    while (str[start] && isspace(str[start])) {
+      start++;
+    }
+
+    // Move a string ajustada para o início
+    if (start > 0) {
+      memmove(str, str + start, strlen(str + start) + 1);
+    }
+  }
+
+  // Função para converter um caractere para maiúsculas
+  char toUpperCaseChar(char c) {
+    if (c >= 'a' && c <= 'z') {
+      return c - ('a' - 'A');
+    }
+    return c;
+  }
+
+  // Função para converter uma string para maiúsculas
+  void toUpperCase(char* str) {
+    for (int i = 0; str[i]; i++) {
+      str[i] = toUpperCaseChar(str[i]);
+    }
   }
 };
 

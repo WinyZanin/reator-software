@@ -4,6 +4,8 @@
 #include <SPI.h>
 #include <SD.h>
 
+#include <IniFile.h>  //inclui a biblioteca de manipulação de arquivos ini
+
 class SDCard {
 public:
   // Construtor, aceita o pino CS (Chip Select) como parâmetro
@@ -82,6 +84,116 @@ public:
     }
   }
 
+  void setupConfig(IniConfig* config) {
+    const size_t bufferLen = 80;
+    char buffer[bufferLen];
+    const char* configFilename = "/config.ini";
+
+    IniFile ini(configFilename);
+
+    if (!ini.open()) {
+      logSD("Arquivo de configuração " + String(configFilename) + " não encontrado.");
+      logSD("Criando arquivo de configuração com valores padrão.");
+      //função para criar o arquivo de configuração com valores padrão
+      File configFile = SD.open(configFilename, FILE_WRITE);
+      if (configFile) {
+        configFile.println("[Time]");
+        sprintf(buffer, "time_stage_0=%lu", iniConfig.time_stage_0);
+        configFile.println(buffer);
+        sprintf(buffer, "time_stage_1=%lu", iniConfig.time_stage_1);
+        configFile.println(buffer);
+        sprintf(buffer, "time_stage_2=%lu", iniConfig.time_stage_2);
+        configFile.println(buffer);
+        sprintf(buffer, "time_stage_3=%lu", iniConfig.time_stage_3);
+        configFile.println(buffer);
+        sprintf(buffer, "time_stage_4=%lu", iniConfig.time_stage_4);
+        configFile.println(buffer);
+        sprintf(buffer, "time_stage_5=%lu", iniConfig.time_stage_5);
+        configFile.println(buffer);
+        sprintf(buffer, "time_vap1=%lu", iniConfig.time_vap1);
+        configFile.println(buffer);
+        sprintf(buffer, "time_vap2=%lu", iniConfig.time_vap2);
+        configFile.println(buffer);
+        configFile.println("[Log]");
+        sprintf(buffer, "log_level=%s", iniConfig.log_level);
+        configFile.println(buffer);
+        configFile.close();
+        logSD("Arquivo de configuração criado com sucesso.");
+      } else {
+        logSD("Erro ao criar o arquivo de configuração.");
+      }
+      configFile.close();
+      return;
+    }
+    logSD("Arquivo de configuração encontrado.");
+
+    // Checa se o arquivo é válido. Isso pode ser usado para avisar se alguma linha
+    // é maior que o buffer.
+    if (!ini.validate(buffer, bufferLen)) {
+      logSD("Arquivo de configuração " + String(configFilename) + " inválido: ");
+      printErrorMessage(ini.getError());
+      return;
+    }
+
+    // Lê os valores do arquivo de configuração
+    if (ini.getValue("Time", "TIME_STAGE_0", buffer, bufferLen)) {
+      //logSD("TIME_STAGE_0=" + String(buffer));
+      iniConfig.time_stage_0 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_STAGE_0");
+
+    if (ini.getValue("Time", "TIME_STAGE_1", buffer, bufferLen)) {
+      //Serial.print("TIME_STAGE_1=" + String(buffer));
+      iniConfig.time_stage_1 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_STAGE_1");
+
+    if (ini.getValue("Time", "TIME_STAGE_2", buffer, bufferLen)) {
+      //Serial.print("TIME_STAGE_2=" + String(buffer));
+      iniConfig.time_stage_2 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_STAGE_2");
+
+    if (ini.getValue("Time", "TIME_STAGE_3", buffer, bufferLen)) {
+      //Serial.print("TIME_STAGE_3=" + String(buffer));
+      iniConfig.time_stage_3 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_STAGE_3");
+
+    if (ini.getValue("Time", "TIME_STAGE_4", buffer, bufferLen)) {
+      //Serial.print("TIME_STAGE_4=" + String(buffer));
+      iniConfig.time_stage_4 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_STAGE_4");
+
+    if (ini.getValue("Time", "TIME_STAGE_5", buffer, bufferLen)) {
+      //Serial.print("TIME_STAGE_5=" + String(buffer));
+      iniConfig.time_stage_5 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_STAGE_5");
+
+    if (ini.getValue("Time", "TIME_VAP1", buffer, bufferLen)) {
+      //Serial.print("TIME_VAP1=" + String(buffer));
+      iniConfig.time_vap1 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_VAP1");
+
+    if (ini.getValue("Time", "TIME_VAP2", buffer, bufferLen)) {
+      //Serial.print("TIME_VAP2=" + String(buffer));
+      iniConfig.time_vap2 = atol(buffer);
+    } else
+      logSD("[ERROR] Não encontrado TIME_VAP2");
+
+    if (ini.getValue("Log", "LOG_LEVEL", buffer, bufferLen)) {
+      //Serial.print("LOG_LEVEL=" + String(buffer));
+      strncpy(iniConfig.log_level, buffer, sizeof(iniConfig.log_level));
+    } else
+      logSD("[ERROR] Não encontrado LOG_LEVEL");
+
+    printErrorMessage(ini.getError());
+  }
+
+
 private:
   int chipSelectPin;
   File logFile;
@@ -111,6 +223,44 @@ private:
   void logSD(String message) {
     //String logMessage = "[SDcard] " + String(millis()) + " ms - " + message;
     Serial.println("[SDcard] " + String(millis()) + " ms - " + message);
+  }
+
+  // Registra mensagens de erro do IniFile
+  void printErrorMessage(uint8_t e, bool eol = true) {
+    switch (e) {
+      case IniFile::errorNoError:
+        logSD("no error");
+        break;
+      case IniFile::errorFileNotFound:
+        logSD("file not found");
+        break;
+      case IniFile::errorFileNotOpen:
+        logSD("file not open");
+        break;
+      case IniFile::errorBufferTooSmall:
+        logSD("buffer too small");
+        break;
+      case IniFile::errorSeekError:
+        logSD("seek error");
+        break;
+      case IniFile::errorSectionNotFound:
+        logSD("section not found");
+        break;
+      case IniFile::errorKeyNotFound:
+        logSD("key not found");
+        break;
+      case IniFile::errorEndOfFile:
+        logSD("end of file");
+        break;
+      case IniFile::errorUnknownError:
+        logSD("unknown error");
+        break;
+      default:
+        logSD("unknown error value");
+        break;
+    }
+    //if (eol)
+    //Serial.println();
   }
 };
 

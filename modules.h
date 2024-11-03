@@ -1,6 +1,8 @@
 #ifndef MODULES_H
 #define MODULES_H
 
+#include "config.h"  //inclui a biblioteca de configuração
+
 // Classe dos modulo do reator, aqui onde vai ficar todo o controle dos dispositivos do reator
 
 //configuração de pinagem dos Reles
@@ -19,10 +21,6 @@
 //#define PIN_REDOX 6          //sensor de potencial redox
 //#define PIN_CONDUTIVIDADE 7  //sensor de condutividade
 
-//configuração de tempo de acionamento das valvulas
-#define TIME_VAP1 15000     //tempo de acionamento da valvula 1 de entrada (VAP1)
-#define TIME_VAP2 15000     //tempo de acionamento da valvula 2 de saída (VAP2)
-
 //biblioteca do sensor de temperatura
 #include <DS18B20.h>   //necessita instalar a biblioteca <OneWire.h> para funcionar
 #include <OneWire.h>   //biblioteca para comunicação 1-Wire
@@ -33,8 +31,9 @@ DS18B20 ds(PIN_TEMP);  //Cria uma instância do sensor DS18B20
 class modules {
 public:
   // construtor da classe
-  modules(Logger* logger) {
-    this->logger = logger;  // ponteiro para a classe Logger
+  modules(Logger* logger, IniConfig* iniConfig) {
+    this->logger = logger;               // ponteiro para a classe Logger
+    this->pointerIniConfig = iniConfig;  // ponteiro para a struct de configuração
 
     //configuração dos pinos de saída
     pinMode(RELAY_VAP1, OUTPUT);
@@ -66,8 +65,8 @@ public:
     digitalWrite(RELAY_VAP1_SEL, LOW);  // seleciona abertura da valvula
     digitalWrite(RELAY_VAP1, LOW);      // aciona a valvula
     logInfo("Abrindo a valvula de entrada...");
-    delay(TIME_VAP1);                // tempo de espera do acionamento da valvula
-    digitalWrite(RELAY_VAP1, HIGH);  // desliga a valvula
+    delay(pointerIniConfig->time_vap1);  // tempo de espera do acionamento da valvula
+    digitalWrite(RELAY_VAP1, HIGH);      // desliga a valvula
     logInfo("valvuva de entrada aberta");
   }
 
@@ -76,8 +75,8 @@ public:
     digitalWrite(RELAY_VAP1_SEL, HIGH);  // seleciona fechamento da valvula
     digitalWrite(RELAY_VAP1, LOW);       // aciona a valvula
     logInfo("Fechando a valvula de entrada...");
-    delay(TIME_VAP1);                // tempo de espera do acionamento da valvula
-    digitalWrite(RELAY_VAP1, HIGH);  // desliga a valvula
+    delay(pointerIniConfig->time_vap1);  // tempo de espera do acionamento da valvula
+    digitalWrite(RELAY_VAP1, HIGH);      // desliga a valvula
     logInfo("valvuva de entrada fechada");
   }
 
@@ -110,8 +109,8 @@ public:
     digitalWrite(RELAY_VAP2_SEL, LOW);  // seleciona abertura da valvula
     digitalWrite(RELAY_VAP2, LOW);      // aciona a valvula
     logInfo("Abrindo a valvula de saída...");
-    delay(TIME_VAP2);                // tempo de espera do acionamento da valvula
-    digitalWrite(RELAY_VAP2, HIGH);  // desliga a valvula
+    delay(pointerIniConfig->time_vap2);  // tempo de espera do acionamento da valvula
+    digitalWrite(RELAY_VAP2, HIGH);      // desliga a valvula
     logInfo("valvuva de saída aberta");
   }
 
@@ -120,8 +119,8 @@ public:
     digitalWrite(RELAY_VAP2_SEL, HIGH);  // seleciona fechamento da valvula
     digitalWrite(RELAY_VAP2, LOW);       // aciona a valvula
     logInfo("Fechando a valvula de saída...");
-    delay(TIME_VAP2);                // tempo de espera do acionamento da valvula
-    digitalWrite(RELAY_VAP2, HIGH);  // desliga a valvula
+    delay(pointerIniConfig->time_vap2);  // tempo de espera do acionamento da valvula
+    digitalWrite(RELAY_VAP2, HIGH);      // desliga a valvula
     logInfo("valvuva de saída fechada");
   }
 
@@ -138,7 +137,8 @@ public:
 
 private:
   // variaveis privadas
-  Logger* logger;  // ponteiro para a classe Logger
+  Logger* logger;               // ponteiro para a classe Logger
+  IniConfig* pointerIniConfig;  // ponteiro para a struct de configuração
 
   // metodos privados
   //função para registrar mensagens informativas
