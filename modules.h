@@ -14,17 +14,17 @@
 #define RELAY_VS 43        // valvula solenoide de entrada de ar comprimido
 
 //configuração de pinagem dos Sensores
-#define PIN_OD A1    //sensor de oxigênio dissolvido
-#define PIN_PH A2    //sensor de pH
-#define PIN_TEMP 5   //sensor de temperatura do reator
-#define PIN_NIVEL 4  //sensor de nível do reator
+#define PIN_OD A1    // sensor de oxigênio dissolvido
+#define PIN_PH A2    // sensor de pH
+#define PIN_TEMP 5   // sensor de temperatura do reator
+#define PIN_NIVEL 4  // sensor de nível do reator
 //#define PIN_REDOX 6          //sensor de potencial redox
 //#define PIN_CONDUTIVIDADE 7  //sensor de condutividade
 
 //biblioteca do sensor de temperatura
-#include <DS18B20.h>   //necessita instalar a biblioteca <OneWire.h> para funcionar
-#include <OneWire.h>   //biblioteca para comunicação 1-Wire
-DS18B20 ds(PIN_TEMP);  //Cria uma instância do sensor DS18B20
+#include <DS18B20.h>   // necessita instalar a biblioteca <OneWire.h> para funcionar
+#include <OneWire.h>   // biblioteca para comunicação 1-Wire
+DS18B20 ds(PIN_TEMP);  // Cria uma instância do sensor DS18B20
 
 #include "logger.h"  //inclui a biblioteca de log
 

@@ -7,7 +7,7 @@
 class Logger {
 public:
   enum Level {
-    DEBUG,
+DEBUG,
     INFO,
     ERROR
   };
@@ -22,6 +22,7 @@ public:
   // Método para inicializar o logger
   void init() {
     // Converte a string de configuração para o enum Level
+    // ou seja, pega o nível de log do arquivo de configuração
     logLevel = stringToEnum(pointerIniConfig->log_level);
   }
 
@@ -46,6 +47,7 @@ public:
     }
   }
 
+  // Método para mostrar as configurações do arquivo de configuração no log
   void showConfig() {
     String logMessage;
     const char* message;
@@ -76,6 +78,7 @@ public:
     logMessage = "LOG_LEVEL: " + String(pointerIniConfig->log_level);
     message = logMessage.c_str();
     log("[INFO]", message);
+    // importante para mostrar o nível de log ativo
     logMessage = "LOG_LEVEL ATIVO: ";
     if (logLevel == DEBUG) {
       logMessage += "DEBUG";
@@ -122,7 +125,7 @@ private:
     } else if (strcmp(str, "ERROR") == 0) {
       return ERROR;
     } else {
-      // Retorna DEBUG como padrão, ou adicione um valor "UNKNOWN" no enum
+      // Retorna INFO como padrão
       return INFO;
     }
   }
@@ -156,7 +159,7 @@ private:
     return c;
   }
 
-  // Função para converter uma string para maiúsculas
+  // Função para converter uma string para maiúsculas, para evitar erros
   void toUpperCase(char* str) {
     for (int i = 0; str[i]; i++) {
       str[i] = toUpperCaseChar(str[i]);

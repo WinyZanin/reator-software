@@ -26,7 +26,7 @@ falta:
 *
 */
 
-#include "config.h"  //inclui a biblioteca de configuração
+#include "config.h"  //inclui a biblioteca de configuração, onde contem a struct IniConfig
 
 //inicializa a struct de configuração com valores padrão
 IniConfig iniConfig = {
@@ -48,35 +48,34 @@ byte stage = 0;  //estágio de funcionamento do reator
 #include "SDCard.h"
 #include <SPI.h>
 #include <SD.h>
-SDCard sdCard(SD_CS);  // Instancia o cartão SD
+SDCard sdCard(SD_CS);  // Instancia o cartão SD, passando o pino CS
 
 //classe de log
 #include "Logger.h"
-Logger logger(&iniConfig, &sdCard, &stage);  // Instancia o Logger no nível DEBUG, INFO, ERROR, o cartão SD e a variável de estágio
+Logger logger(&iniConfig, &sdCard, &stage);  // Instancia o logger, passando a struct de configuração, o cartão SD e o estágio
 
 //classe de modulos
 #include "modules.h"
 modules modules(&logger, &iniConfig);  // Instancia os módulos, passando o logger
 
-unsigned long time = 0;  //tempo de funcionamento do reator
+unsigned long time = 0;  // tempo de funcionamento do reator
 
 void setup() {
-  Serial.begin(9600);  //inicialização da comunicação serial
+  Serial.begin(9600);  // inicialização da comunicação serial
 
-  //inicialização do cartão SD
+  // inicialização do cartão SD
   if (!sdCard.begin()) {
     logger.error("Falha ao inicializar o cartão SD!");
   } else {
     logger.info("Cartão SD inicializado com sucesso.");
-    sdCard.setupConfig(&iniConfig);
-    if (!sdCard.openFiles()) {
+    sdCard.setupConfig(&iniConfig);  // Configura o arquivo de configuração
+    if (!sdCard.openFiles()) {       // cria os arquivos de log e CSV
       logger.error("Erro ao abrir os arquivos.");
     }
   }
-  logger.init();  //inicializa o logger
-  logger.showConfig();  //mostra o nível de log
+  logger.init();        // Inicializa o logger
+  logger.showConfig();  // mostra as configurações no Log
   logger.info("Reator iniciado");
-  logger.debug("teste de debug");
 }
 
 void loop() {
@@ -85,8 +84,8 @@ void loop() {
       if (time == 0) {
         modules.openVAP1();    // abre a valvula de entrada
         modules.activePump();  // aciona a bomba
-        time = millis();       //inicia a contagem do tempo
-        logger.info("Iniciando o processo de enchimento do reator");
+        time = millis();       // inicia a contagem do tempo
+        logger.info("Iniciando o processo de enchimento do reator...");
       } else {
         if (millis() - time >= iniConfig.time_stage_0) {
           modules.stopPump();   // desliga a bomba
@@ -100,7 +99,7 @@ void loop() {
     case 1:
       if (time == 0) {
         time = millis();
-        logger.info("Iniciando o processo de anaerobico");
+        logger.info("Iniciando o processo de anaerobico...");
       } else {
         if (millis() - time >= iniConfig.time_stage_1) {
           logger.info("Processo de anaerobico concluido");
@@ -112,7 +111,7 @@ void loop() {
     case 2:
       if (time == 0) {
         time = millis();  //inicia a contagem do tempo
-        logger.info("Iniciando o processo de reação");
+        logger.info("Iniciando o processo de reação...");
         modules.openVS();  // abre a valvula de entrada de ar comprimido
       } else {
         if (millis() - time >= iniConfig.time_stage_2) {
@@ -125,8 +124,8 @@ void loop() {
       break;
     case 3:
       if (time == 0) {
-        time = millis();  //inicia a contagem do tempo
-        logger.info("Iniciando o processo de sedimentação");
+        time = millis();  // inicia a contagem do tempo
+        logger.info("Iniciando o processo de sedimentação...");
       } else {
         if (millis() - time >= iniConfig.time_stage_3) {
           logger.info("Processo de sedimentação concluido");
@@ -137,10 +136,10 @@ void loop() {
       break;
     case 4:
       if (time == 0) {
-        time = millis();  //inicia a contagem do tempo
-        logger.info("Iniciando o processo de esvaziamento");
+        time = millis();  // inicia a contagem do tempo
+        logger.info("Iniciando o processo de esvaziamento...");
         modules.openVAP2();  // abre a valvula de saída
-        time = millis();     //inicia a contagem do tempo
+        time = millis();     // inicia a contagem do tempo
       } else {
         if (millis() - time >= iniConfig.time_stage_4) {
           modules.closeVAP2();  // fecha a valvula de saída
@@ -150,12 +149,12 @@ void loop() {
         }
       }
       break;
-    case 5:  //finalização do processo
+    case 5:  // finalização do processo
       logger.info("Processo finalizado");
-      stage = 0;  //reinicia o processo
+      stage = 0;  // reinicia o processo
       break;
     default:
       break;
   }
-  delay(1000);  //tempo de espera entre ciclos
+  delay(1000);  // tempo de espera entre ciclos
 }

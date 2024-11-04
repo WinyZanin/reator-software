@@ -4,14 +4,14 @@
 #include <SPI.h>
 #include <SD.h>
 
-#include <IniFile.h>  //inclui a biblioteca de manipulação de arquivos ini
+#include <IniFile.h>  //inclui a biblioteca de manipulação de arquivos .ini
 
 class SDCard {
 public:
   // Construtor, aceita o pino CS (Chip Select) como parâmetro
   SDCard(int chipSelectPin) {
-    this->chipSelectPin = chipSelectPin;
-    this->directoryCount = 0;  // Inicializa a contagem de diretórios
+    this->chipSelectPin = chipSelectPin;  // Inicializa o pino CS
+    this->directoryCount = 0;             // Inicializa a contagem de diretórios
   }
 
   // Inicializa o cartão SD
@@ -23,13 +23,14 @@ public:
     logSD("Cartão SD inicializado com sucesso.");
 
     // Determina o próximo diretório sequencial a ser criado
+    // lê o diretorio mais alto e incrementa
     directoryCount = findNextDirectoryNumber();
-    createDirectory(directoryCount);
+    createDirectory(directoryCount);  // Cria o diretório de trabalho, que vai ser usado para armazenar os arquivos
 
     return true;
   }
 
-  // Abre o arquivo de log e o arquivo CSV no novo diretório
+  // Cria o arquivo de log e o arquivo CSV no novo diretório
   bool openFiles() {
     String directoryName = "/log_" + String(directoryCount);                         // Nome do diretório de trabalho
     String logFilePath = directoryName + "/log-" + String(directoryCount) + ".log";  // Caminho do arquivo de log
@@ -38,14 +39,14 @@ public:
     // Abre o arquivo de log (cria se não existir)
     logFile = SD.open(logFilePath.c_str(), FILE_WRITE);
     if (!logFile) {
-      logSD("Erro ao abrir o arquivo de log.");
+      logSD("[ERROR] ao abrir o arquivo de log.");
       return false;
     }
     logSD("Arquivo de log aberto: " + logFilePath);
     // Abre o arquivo CSV (cria se não existir)
     csvFile = SD.open(csvFilePath.c_str(), FILE_WRITE);
     if (!csvFile) {
-      logSD("Erro ao abrir o arquivo CSV.");
+      logSD("[ERROR] ao abrir o arquivo CSV.");
       return false;
     }
     logSD("Arquivo CSV aberto: " + csvFilePath);
@@ -72,7 +73,7 @@ public:
     }
   }
 
-  // Fecha os arquivos
+  // Fecha os arquivos, importante para evitar perda de dados
   void closeFiles() {
     if (logFile) {
       logFile.close();
@@ -84,18 +85,25 @@ public:
     }
   }
 
+  // Função para configurar o arquivo de configuração
+  // Recebe um ponteiro para a struct IniConfig,
+  // que será preenchida com os valores lidos do arquivo de configuração,
+  // ou com valores padrão caso o arquivo não exista.
   void setupConfig(IniConfig* config) {
     const size_t bufferLen = 80;
     char buffer[bufferLen];
-    const char* configFilename = "/config.ini";
+    const char* configFilename = "/config.ini";  // Nome do arquivo de configuração
 
-    IniFile ini(configFilename);
+    IniFile ini(configFilename);  // Instancia o objeto IniFile
 
+    // Abre o arquivo de configuração
     if (!ini.open()) {
+      // caso o arquivo não exista, cria um novo com valores padrão
       logSD("Arquivo de configuração " + String(configFilename) + " não encontrado.");
       logSD("Criando arquivo de configuração com valores padrão.");
       //função para criar o arquivo de configuração com valores padrão
-      File configFile = SD.open(configFilename, FILE_WRITE);
+      File configFile = SD.open(configFilename, FILE_WRITE);  // Abre o arquivo para escrita
+      // Checa se o arquivo foi aberto corretamente e escreve os valores padrão
       if (configFile) {
         configFile.println("[Time]");
         sprintf(buffer, "time_stage_0=%lu", iniConfig.time_stage_0);
@@ -120,85 +128,86 @@ public:
         configFile.close();
         logSD("Arquivo de configuração criado com sucesso.");
       } else {
-        logSD("Erro ao criar o arquivo de configuração.");
+        logSD("[ERROR] ao criar o arquivo de configuração.");
       }
       configFile.close();
-      return;
+    } else {
+      // Caso o arquivo exista, lê os valores
+      logSD("Arquivo de configuração encontrado.");
+
+      // Checa se o arquivo é válido. Isso pode ser usado para avisar se alguma linha
+      // é maior que o buffer.
+      if (!ini.validate(buffer, bufferLen)) {
+        logSD("Arquivo de configuração " + String(configFilename) + " inválido: ");
+        printErrorMessage(ini.getError());
+        return;
+      }
+
+      // Lê os valores do arquivo de configuração
+      if (ini.getValue("Time", "TIME_STAGE_0", buffer, bufferLen)) {
+        //logSD("TIME_STAGE_0=" + String(buffer));
+        iniConfig.time_stage_0 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_STAGE_0");
+
+      if (ini.getValue("Time", "TIME_STAGE_1", buffer, bufferLen)) {
+        //Serial.print("TIME_STAGE_1=" + String(buffer));
+        iniConfig.time_stage_1 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_STAGE_1");
+
+      if (ini.getValue("Time", "TIME_STAGE_2", buffer, bufferLen)) {
+        //Serial.print("TIME_STAGE_2=" + String(buffer));
+        iniConfig.time_stage_2 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_STAGE_2");
+
+      if (ini.getValue("Time", "TIME_STAGE_3", buffer, bufferLen)) {
+        //Serial.print("TIME_STAGE_3=" + String(buffer));
+        iniConfig.time_stage_3 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_STAGE_3");
+
+      if (ini.getValue("Time", "TIME_STAGE_4", buffer, bufferLen)) {
+        //Serial.print("TIME_STAGE_4=" + String(buffer));
+        iniConfig.time_stage_4 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_STAGE_4");
+
+      if (ini.getValue("Time", "TIME_STAGE_5", buffer, bufferLen)) {
+        //Serial.print("TIME_STAGE_5=" + String(buffer));
+        iniConfig.time_stage_5 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_STAGE_5");
+
+      if (ini.getValue("Time", "TIME_VAP1", buffer, bufferLen)) {
+        //Serial.print("TIME_VAP1=" + String(buffer));
+        iniConfig.time_vap1 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_VAP1");
+
+      if (ini.getValue("Time", "TIME_VAP2", buffer, bufferLen)) {
+        //Serial.print("TIME_VAP2=" + String(buffer));
+        iniConfig.time_vap2 = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_VAP2");
+
+      if (ini.getValue("Log", "LOG_LEVEL", buffer, bufferLen)) {
+        //Serial.print("LOG_LEVEL=" + String(buffer));
+        strncpy(iniConfig.log_level, buffer, sizeof(iniConfig.log_level));
+      } else
+        logSD("[ERROR] Não encontrado LOG_LEVEL");
+
+      printErrorMessage(ini.getError());  // Imprime mensagens de erro, se houver
     }
-    logSD("Arquivo de configuração encontrado.");
-
-    // Checa se o arquivo é válido. Isso pode ser usado para avisar se alguma linha
-    // é maior que o buffer.
-    if (!ini.validate(buffer, bufferLen)) {
-      logSD("Arquivo de configuração " + String(configFilename) + " inválido: ");
-      printErrorMessage(ini.getError());
-      return;
-    }
-
-    // Lê os valores do arquivo de configuração
-    if (ini.getValue("Time", "TIME_STAGE_0", buffer, bufferLen)) {
-      //logSD("TIME_STAGE_0=" + String(buffer));
-      iniConfig.time_stage_0 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_STAGE_0");
-
-    if (ini.getValue("Time", "TIME_STAGE_1", buffer, bufferLen)) {
-      //Serial.print("TIME_STAGE_1=" + String(buffer));
-      iniConfig.time_stage_1 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_STAGE_1");
-
-    if (ini.getValue("Time", "TIME_STAGE_2", buffer, bufferLen)) {
-      //Serial.print("TIME_STAGE_2=" + String(buffer));
-      iniConfig.time_stage_2 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_STAGE_2");
-
-    if (ini.getValue("Time", "TIME_STAGE_3", buffer, bufferLen)) {
-      //Serial.print("TIME_STAGE_3=" + String(buffer));
-      iniConfig.time_stage_3 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_STAGE_3");
-
-    if (ini.getValue("Time", "TIME_STAGE_4", buffer, bufferLen)) {
-      //Serial.print("TIME_STAGE_4=" + String(buffer));
-      iniConfig.time_stage_4 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_STAGE_4");
-
-    if (ini.getValue("Time", "TIME_STAGE_5", buffer, bufferLen)) {
-      //Serial.print("TIME_STAGE_5=" + String(buffer));
-      iniConfig.time_stage_5 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_STAGE_5");
-
-    if (ini.getValue("Time", "TIME_VAP1", buffer, bufferLen)) {
-      //Serial.print("TIME_VAP1=" + String(buffer));
-      iniConfig.time_vap1 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_VAP1");
-
-    if (ini.getValue("Time", "TIME_VAP2", buffer, bufferLen)) {
-      //Serial.print("TIME_VAP2=" + String(buffer));
-      iniConfig.time_vap2 = atol(buffer);
-    } else
-      logSD("[ERROR] Não encontrado TIME_VAP2");
-
-    if (ini.getValue("Log", "LOG_LEVEL", buffer, bufferLen)) {
-      //Serial.print("LOG_LEVEL=" + String(buffer));
-      strncpy(iniConfig.log_level, buffer, sizeof(iniConfig.log_level));
-    } else
-      logSD("[ERROR] Não encontrado LOG_LEVEL");
-
-    printErrorMessage(ini.getError());
   }
 
 
 private:
-  int chipSelectPin;
-  File logFile;
-  File csvFile;
-  int directoryCount;
+  int chipSelectPin;   // Pino CS do cartão SD
+  File logFile;        // Arquivo de log
+  File csvFile;        // Arquivo CSV
+  int directoryCount;  // Contador de diretórios
 
   // Busca o próximo número de diretório sequencial
   int findNextDirectoryNumber() {
@@ -215,7 +224,7 @@ private:
     if (SD.mkdir(directoryName.c_str())) {
       logSD("Diretório criado: " + directoryName);
     } else {
-      logSD("Erro ao criar o diretório.");
+      logSD("[ERROR] ao criar o diretório.");
     }
   }
 
