@@ -44,7 +44,7 @@ public:
     pinMode(RELAY_VS, OUTPUT);
 
     //configuração dos pinos de entrada
-    pinMode(PIN_OD, INPUT);
+    //pinMode(PIN_OD, INPUT); //não é necessario
     pinMode(PIN_PH, INPUT);
     pinMode(PIN_NIVEL, INPUT);
     //pinMode(TEMPERATURA, INPUT);
@@ -133,6 +133,13 @@ public:
       logError("Erro ao ler a temperatura");
     }
     return 0;
+  }
+
+  // função para obter o valor do sensor de OD
+  // vai ser utilizado a leitura analógica, pois não obtivemos sucesso com a calibragem
+  // exemplo completo: https://wiki.dfrobot.com/Gravity__Analog_Dissolved_Oxygen_Sensor_SKU_SEN0237
+  int getOD() {
+    return analogRead(PIN_OD);
   }
 
 private:
