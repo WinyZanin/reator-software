@@ -7,7 +7,7 @@
 class Logger {
 public:
   enum Level {
-DEBUG,
+    DEBUG,
     INFO,
     ERROR
   };
@@ -66,6 +66,7 @@ DEBUG,
     } else if (logLevel == ERROR) {
       log("[INFO]", "LOG_LEVEL ATIVO: ERROR");
     }
+    log("[INFO]", "TIME_SENS_LOG: " + String(pointerIniConfig->time_sens_log));
   }
 
 private:

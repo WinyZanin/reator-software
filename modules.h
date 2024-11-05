@@ -142,6 +142,16 @@ public:
     return analogRead(PIN_OD);
   }
 
+  // função para obter o valor do sensor de pH
+  int getPH() {
+    return analogRead(PIN_PH);
+  }
+
+  // função para obter o valor do sensor de nível
+  bool getNivel() {
+    return digitalRead(PIN_NIVEL);
+  }
+
 private:
   // variaveis privadas
   Logger* logger;               // ponteiro para a classe Logger

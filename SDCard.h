@@ -51,7 +51,7 @@ public:
     }
     logSD("Arquivo CSV aberto: " + csvFilePath);
     // Escreve o cabeçalho no arquivo CSV
-    csvFile.println("Tempo (ms), Valor do Sensor");
+    csvFile.println("TIME_MS,TEMPERATURE,OD,PH,NIVEL");
     return true;
   }
 
@@ -64,11 +64,17 @@ public:
   }
 
   // Escreve no arquivo CSV (tempo e valor do sensor)
-  void writeCSV(unsigned long timeMillis, float sensorValue) {
+  void writeCSV(unsigned long timeMillis, float temperature, int od, int ph, bool nivel) {
     if (csvFile) {
       csvFile.print(timeMillis);
       csvFile.print(",");
-      csvFile.println(sensorValue);
+      csvFile.print(temperature);
+      csvFile.print(",");
+      csvFile.print(od);
+      csvFile.print(",");
+      csvFile.print(ph);
+      csvFile.print(",");
+      csvFile.println(nivel);
       csvFile.flush();  // Grava os dados imediatamente
     }
   }
@@ -124,6 +130,8 @@ public:
         configFile.println(buffer);
         configFile.println("[Log]");
         sprintf(buffer, "log_level=%s", iniConfig.log_level);
+        configFile.println(buffer);
+        sprintf(buffer, "time_sens_log=%lu", iniConfig.time_sens_log);
         configFile.println(buffer);
         configFile.close();
         logSD("Arquivo de configuração criado com sucesso.");
@@ -197,6 +205,12 @@ public:
         strncpy(iniConfig.log_level, buffer, sizeof(iniConfig.log_level));
       } else
         logSD("[ERROR] Não encontrado LOG_LEVEL");
+
+      if (ini.getValue("Log", "TIME_SENS_LOG", buffer, bufferLen)) {
+        //Serial.print("TIME_SENS_LOG=" + String(buffer));
+        iniConfig.time_sens_log = atol(buffer);
+      } else
+        logSD("[ERROR] Não encontrado TIME_SENS_LOG");
 
       printErrorMessage(ini.getError());  // Imprime mensagens de erro, se houver
     }

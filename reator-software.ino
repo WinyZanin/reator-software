@@ -30,15 +30,16 @@ falta:
 
 //inicializa a struct de configuração com valores padrão
 IniConfig iniConfig = {
-  10000,  //tempo do estagio 0 (enchimento)
-  10000,  //tempo do estagio 1 (anaerobico)
-  10000,  //tempo do estagio 2 (reação)
-  10000,  //tempo do estagio 3 (sedimentação)
-  10000,  //tempo do estagio 4 (esvaizamento/retirada)
-  10000,  //tempo do estagio 5 (finalizado)
-  15000,  //tempo de acionamento da valvula 1 de entrada (VAP1)
-  15000,  //tempo de acionamento da valvula 2 de saída (VAP2)
-  "INFO"  //nível de log (DEBUG, INFO, ERROR)
+  10000,   //tempo do estagio 0 (enchimento)
+  10000,   //tempo do estagio 1 (anaerobico)
+  10000,   //tempo do estagio 2 (reação)
+  10000,   //tempo do estagio 3 (sedimentação)
+  10000,   //tempo do estagio 4 (esvaizamento/retirada)
+  10000,   //tempo do estagio 5 (finalizado)
+  15000,   //tempo de acionamento da valvula 1 de entrada (VAP1)
+  15000,   //tempo de acionamento da valvula 2 de saída (VAP2)
+  "INFO",  //nível de log (DEBUG, INFO, ERROR)
+  10000    //tempo de log dos sensores
 };
 
 byte stage = 0;  //estágio de funcionamento do reator
@@ -58,7 +59,8 @@ Logger logger(&iniConfig, &sdCard, &stage);  // Instancia o logger, passando a s
 #include "modules.h"
 modules modules(&logger, &iniConfig);  // Instancia os módulos, passando o logger
 
-unsigned long time = 0;  // tempo de funcionamento do reator
+unsigned long time = 0;       // tempo de funcionamento do reator
+unsigned long time_sens = 0;  // tempo de log dos sensores
 
 void setup() {
   Serial.begin(9600);  // inicialização da comunicação serial
@@ -87,7 +89,8 @@ void loop() {
         time = millis();       // inicia a contagem do tempo
         logger.info("Iniciando o processo de enchimento do reator...");
       } else {
-        if (millis() - time >= iniConfig.time_stage_0) {
+        // verifica se o tempo de enchimento foi atingido ou se o nível foi alcançado
+        if (millis() - time >= iniConfig.time_stage_0 || modules.getNivel()) {
           modules.stopPump();   // desliga a bomba
           modules.closeVAP1();  // fecha a valvula de entrada
           logger.info("Processo de enchimento do reator concluido");
@@ -156,5 +159,10 @@ void loop() {
     default:
       break;
   }
+  if (millis() - time_sens >= iniConfig.time_sens_log) {
+    time_sens = millis();
+    sdCard.writeCSV(millis(), modules.getTemperature(), modules.getOD(), modules.getPH(), modules.getNivel());  // grava os dados no arquivo CSV
+  }
+
   delay(1000);  // tempo de espera entre ciclos
 }
