@@ -149,14 +149,12 @@ private:
 
   // metodos privados
   //função para registrar mensagens informativas
-  void logInfo(const char* message) {
-    String completeMessage = "[MODULES] " + String(message);
-    logger->info(completeMessage.c_str());
+  void logInfo(const String message) {
+    logger->info("[MODULES] " + message);
   }
   //função para registrar mensagens de erro
-  void logError(const char* message) {
-    String completeMessage = "[MODULES] " + String(message);
-    logger->error(completeMessage.c_str());
+  void logError(const String message) {
+    logger->error("[MODULES] " + message);
   }
 };
 

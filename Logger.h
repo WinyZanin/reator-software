@@ -27,21 +27,21 @@ DEBUG,
   }
 
   // Método para registrar mensagens informativas
-  void info(const char* message) {
+  void info(const String message) {
     if (logLevel <= INFO) {
       log("[INFO]", message);
     }
   }
 
   // Método para registrar mensagens de debug
-  void debug(const char* message) {
+  void debug(const String message) {
     if (logLevel <= DEBUG) {
       log("[DEBUG]", message);
     }
   }
 
   // Método para registrar mensagens de erro
-  void error(const char* message) {
+  void error(const String message) {
     if (logLevel <= ERROR) {
       log("[ERROR]", message);
     }
@@ -49,46 +49,23 @@ DEBUG,
 
   // Método para mostrar as configurações do arquivo de configuração no log
   void showConfig() {
-    String logMessage;
-    const char* message;
-    logMessage = "TIME_STAGE_0: " + String(pointerIniConfig->time_stage_0);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "TIME_STAGE_1: " + String(pointerIniConfig->time_stage_1);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "TIME_STAGE_2: " + String(pointerIniConfig->time_stage_2);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "TIME_STAGE_3: " + String(pointerIniConfig->time_stage_3);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "TIME_STAGE_4: " + String(pointerIniConfig->time_stage_4);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "TIME_STAGE_5: " + String(pointerIniConfig->time_stage_5);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "TIME_VAP1: " + String(pointerIniConfig->time_vap1);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "TIME_VAP2: " + String(pointerIniConfig->time_vap2);
-    message = logMessage.c_str();
-    log("[INFO]", message);
-    logMessage = "LOG_LEVEL: " + String(pointerIniConfig->log_level);
-    message = logMessage.c_str();
-    log("[INFO]", message);
+    log("[INFO]", "TIME_STAGE_0: " + String(pointerIniConfig->time_stage_0));
+    log("[INFO]", "TIME_STAGE_1: " + String(pointerIniConfig->time_stage_1));
+    log("[INFO]", "TIME_STAGE_2: " + String(pointerIniConfig->time_stage_2));
+    log("[INFO]", "TIME_STAGE_3: " + String(pointerIniConfig->time_stage_3));
+    log("[INFO]", "TIME_STAGE_4: " + String(pointerIniConfig->time_stage_4));
+    log("[INFO]", "TIME_STAGE_5: " + String(pointerIniConfig->time_stage_5));
+    log("[INFO]", "TIME_VAP1: " + String(pointerIniConfig->time_vap1));
+    log("[INFO]", "TIME_VAP2: " + String(pointerIniConfig->time_vap2));
+    log("[INFO]", "LOG_LEVEL: " + String(pointerIniConfig->log_level));
     // importante para mostrar o nível de log ativo
-    logMessage = "LOG_LEVEL ATIVO: ";
     if (logLevel == DEBUG) {
-      logMessage += "DEBUG";
+      log("[INFO]", "LOG_LEVEL ATIVO: DEBUG");
     } else if (logLevel == INFO) {
-      logMessage += "INFO";
+      log("[INFO]", "LOG_LEVEL ATIVO: INFO");
     } else if (logLevel == ERROR) {
-      logMessage += "ERROR";
+      log("[INFO]", "LOG_LEVEL ATIVO: ERROR");
     }
-    message = logMessage.c_str();
-    log("[INFO]", message);
   }
 
 private:
@@ -98,7 +75,7 @@ private:
   byte* PointerStage;           // Ponteiro para a variável de estágio
 
   // Método privado para registrar log no Monitor Serial e no cartão SD
-  void log(const char* level, const char* message) {
+  void log(const char* level, const String message) {
     // Monta a mensagem de log, incluindo o tempo em milissegundos e o estágio atual
     // Exemplo: [INFO] 4235 ms Stage:1 - Iniciando o processo de anaerobico
     String logMessage = String(level) + " " + String(millis()) + " ms Stage:" + *PointerStage + " - " + message;
