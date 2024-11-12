@@ -49,6 +49,7 @@ public:
 
   // Método para mostrar as configurações do arquivo de configuração no log
   void showConfig() {
+    log("[INFO]", "Configurações do arquivo de configuração:");
     log("[INFO]", "TIME_STAGE_0: " + String(pointerIniConfig->time_stage_0));
     log("[INFO]", "TIME_STAGE_1: " + String(pointerIniConfig->time_stage_1));
     log("[INFO]", "TIME_STAGE_2: " + String(pointerIniConfig->time_stage_2));

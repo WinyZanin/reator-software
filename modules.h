@@ -16,8 +16,8 @@
 //configuração de pinagem dos Sensores
 #define PIN_OD A1    // sensor de oxigênio dissolvido
 #define PIN_PH A2    // sensor de pH
-#define PIN_TEMP 5   // sensor de temperatura do reator
-#define PIN_NIVEL 4  // sensor de nível do reator
+#define PIN_TEMP 2   // sensor de temperatura do reator
+#define PIN_NIVEL 7  // sensor de nível do reator
 //#define PIN_REDOX 6          //sensor de potencial redox
 //#define PIN_CONDUTIVIDADE 7  //sensor de condutividade
 
@@ -45,7 +45,7 @@ public:
 
     //configuração dos pinos de entrada
     //pinMode(PIN_OD, INPUT); //não é necessario
-    pinMode(PIN_PH, INPUT);
+    //pinMode(PIN_PH, INPUT);
     pinMode(PIN_NIVEL, INPUT);
     //pinMode(TEMPERATURA, INPUT);
 
@@ -56,6 +56,11 @@ public:
     digitalWrite(RELAY_VAP2_SEL, HIGH);
     digitalWrite(RELAY_PUMP, HIGH);
     digitalWrite(RELAY_VS, HIGH);
+
+    //inicialização do sensor de temperatura
+    uint8_t address[8];                 // endereço do sensor de temperatura
+    ds.getAddress(address);             // captura o endereço do sensor
+    TempSelected = ds.select(address);  // seleciona o sensor
   }
 
   // metodos publicos
@@ -126,11 +131,12 @@ public:
 
   //função para obter o valor do sensor de temperatura
   float getTemperature() {
-    if (ds.selectNext()) {
+    // Verifica se o sensor foi selecionado
+    if (TempSelected) {
       // Captura a temperatura em graus Celsius
       return ds.getTempC();
     } else {
-      logError("Erro ao ler a temperatura");
+      logError("Erro ao ler a temperatura, sensor não encontrado.");
     }
     return 0;
   }
@@ -156,6 +162,8 @@ private:
   // variaveis privadas
   Logger* logger;               // ponteiro para a classe Logger
   IniConfig* pointerIniConfig;  // ponteiro para a struct de configuração
+
+  uint8_t TempSelected;  // seleciona qual sensor DS18B20 será utilizado
 
   // metodos privados
   //função para registrar mensagens informativas

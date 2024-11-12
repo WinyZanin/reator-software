@@ -7,7 +7,7 @@ falta:
 - criar rotinas de debug (falta definir algumas coisas)
 - fazer função de testes de reles e sensores (sera para acessar no futuro front-end)
 - criar função para pegar parametros de um arquivo de configuração no SD Card(OK)
-- certificar que todas as valvulas estão fechadas no inicio do programa
+- certificar que todas as valvulas estão fechadas no inicio do programa (OK)
 - dividir arquivos de log por ciclos de funcionamento
 */
 
@@ -30,22 +30,22 @@ falta:
 
 //inicializa a struct de configuração com valores padrão
 IniConfig iniConfig = {
-  10000,   //tempo do estagio 0 (enchimento)
-  10000,   //tempo do estagio 1 (anaerobico)
-  10000,   //tempo do estagio 2 (reação)
-  10000,   //tempo do estagio 3 (sedimentação)
-  10000,   //tempo do estagio 4 (esvaizamento/retirada)
-  10000,   //tempo do estagio 5 (finalizado)
-  15000,   //tempo de acionamento da valvula 1 de entrada (VAP1)
-  15000,   //tempo de acionamento da valvula 2 de saída (VAP2)
-  "INFO",  //nível de log (DEBUG, INFO, ERROR)
-  10000    //tempo de log dos sensores
+  10000,    //tempo do estagio 0 (enchimento)
+  10000,    //tempo do estagio 1 (anaerobico)
+  10000,    //tempo do estagio 2 (reação)
+  10000,    //tempo do estagio 3 (sedimentação)
+  10000,    //tempo do estagio 4 (esvaizamento/retirada)
+  10000,    //tempo do estagio 5 (finalizado)
+  15000,    //tempo de acionamento da valvula 1 de entrada (VAP1)
+  15000,    //tempo de acionamento da valvula 2 de saída (VAP2)
+  "DEBUG",  //nível de log (DEBUG, INFO, ERROR)
+  10000     //tempo de log dos sensores
 };
 
 byte stage = 0;  //estágio de funcionamento do reator
 
 //classe do cartão SD
-#define SD_CS 10  // Pino CS do cartão SD
+#define SD_CS 5  // Pino CS do cartão SD
 #include "SDCard.h"
 #include <SPI.h>
 #include <SD.h>
@@ -62,6 +62,18 @@ modules modules(&logger, &iniConfig);  // Instancia os módulos, passando o logg
 unsigned long time = 0;       // tempo de funcionamento do reator
 unsigned long time_sens = 0;  // tempo de log dos sensores
 
+void logSensor() {
+  const float temperature = modules.getTemperature();
+  const int od = modules.getOD();
+  const int ph = modules.getPH();
+  const bool nivel = modules.getNivel();
+  logger.debug("Temperatura:" + String(temperature) + "Cº OD:" + String(od) + " PH:" + String(ph) + " Nivel:" + String(nivel) + " Stage:" + String(stage));
+  if (millis() - time_sens >= iniConfig.time_sens_log) {
+    time_sens = millis();
+    sdCard.writeCSV(millis(), temperature, od, ph, nivel);
+  }
+}
+
 void setup() {
   Serial.begin(9600);  // inicialização da comunicação serial
 
@@ -77,10 +89,22 @@ void setup() {
   }
   logger.init();        // Inicializa o logger
   logger.showConfig();  // mostra as configurações no Log
+
+  logSensor();  // primeiro log dos sensores
+  // certificando que as valvulas estão fechadas
+  logger.info("Certificando que as valvulas estão fechadas...");
+  modules.closeVAP1();
+  modules.closeVAP2();
+  modules.closeVS();
+  logger.info("Valvulas fechadas");
   logger.info("Reator iniciado");
 }
 
 void loop() {
+  // log dos sensores
+  logSensor();
+
+  // controle do estágio de funcionamento do reator
   switch (stage) {
     case 0:  // fase de enchimento
       if (time == 0) {
@@ -158,10 +182,6 @@ void loop() {
       break;
     default:
       break;
-  }
-  if (millis() - time_sens >= iniConfig.time_sens_log) {
-    time_sens = millis();
-    sdCard.writeCSV(millis(), modules.getTemperature(), modules.getOD(), modules.getPH(), modules.getNivel());  // grava os dados no arquivo CSV
   }
 
   delay(1000);  // tempo de espera entre ciclos
