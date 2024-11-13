@@ -17,7 +17,7 @@
 #define PIN_OD A1    // sensor de oxigênio dissolvido
 #define PIN_PH A2    // sensor de pH
 #define PIN_TEMP 2   // sensor de temperatura do reator
-#define PIN_NIVEL 7  // sensor de nível do reator
+#define PIN_NIVEL 9  // sensor de nível do reator
 //#define PIN_REDOX 6          //sensor de potencial redox
 //#define PIN_CONDUTIVIDADE 7  //sensor de condutividade
 

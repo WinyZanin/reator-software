@@ -70,7 +70,7 @@ void logSensor() {
   logger.debug("Temperatura:" + String(temperature) + "Cº OD:" + String(od) + " PH:" + String(ph) + " Nivel:" + String(nivel) + " Stage:" + String(stage));
   if (millis() - time_sens >= iniConfig.time_sens_log) {
     time_sens = millis();
-    sdCard.writeCSV(millis(), temperature, od, ph, nivel);
+    sdCard.writeCSV(millis(), temperature, od, ph, nivel, stage);
   }
 }
 

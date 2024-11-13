@@ -51,7 +51,7 @@ public:
     }
     logSD("Arquivo CSV aberto: " + csvFilePath);
     // Escreve o cabeçalho no arquivo CSV
-    csvFile.println("TIME_MS,TEMPERATURE,OD,PH,NIVEL");
+    csvFile.println("TIME_MS,TEMPERATURE,OD,PH,NIVEL,STAGE");
     return true;
   }
 
@@ -64,7 +64,7 @@ public:
   }
 
   // Escreve no arquivo CSV (tempo e valor do sensor)
-  void writeCSV(unsigned long timeMillis, float temperature, int od, int ph, bool nivel) {
+  void writeCSV(unsigned long timeMillis, float temperature, int od, int ph, bool nivel, byte stage) {
     if (csvFile) {
       csvFile.print(timeMillis);
       csvFile.print(",");
@@ -74,8 +74,11 @@ public:
       csvFile.print(",");
       csvFile.print(ph);
       csvFile.print(",");
-      csvFile.println(nivel);
-      csvFile.flush();  // Grava os dados imediatamente
+      csvFile.print(nivel);
+      csvFile.print(",");
+      csvFile.print(stage);
+      csvFile.println("");  //avança para procima linha
+      csvFile.flush();      // Grava os dados imediatamente
     }
   }
 
