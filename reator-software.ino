@@ -30,15 +30,15 @@ falta:
 
 //inicializa a struct de configuração com valores padrão
 IniConfig iniConfig = {
-  10000,    //tempo do estagio 0 (enchimento)
-  10000,    //tempo do estagio 1 (anaerobico)
-  10000,    //tempo do estagio 2 (reação)
-  10000,    //tempo do estagio 3 (sedimentação)
-  10000,    //tempo do estagio 4 (esvaizamento/retirada)
-  10000,    //tempo do estagio 5 (finalizado)
+  1200000,    //tempo do estagio 0 (enchimento)
+  600000,    //tempo do estagio 1 (anaerobico)
+  11700000,    //tempo do estagio 2 (reação)
+  300000,    //tempo do estagio 3 (sedimentação)
+  600000,    //tempo do estagio 4 (esvaizamento/retirada)
+  1000,    //tempo do estagio 5 (finalizado)
   15000,    //tempo de acionamento da valvula 1 de entrada (VAP1)
   15000,    //tempo de acionamento da valvula 2 de saída (VAP2)
-  "DEBUG",  //nível de log (DEBUG, INFO, ERROR)
+  "INFO",  //nível de log (DEBUG, INFO, ERROR)
   10000     //tempo de log dos sensores
 };
 
